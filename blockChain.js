@@ -2,31 +2,37 @@ const crypto = require("crypto");
 
 class BlockChain {
     constructor() {
-        this._level = 3
+        this._level = 5
     }
 
 
-    genLevel(current) {
-        if (!current) {
-            return this.genLevel('0');
+    genLevel() {
+
+        let level = '';
+
+        for (let i = 0; i < this._level; i++) {
+            level = level.concat('0')
         }
-        if (current.length < this._level) {
-            return this.genLevel(current + "0")
-        }
-        return current
+
+        return level
     }
 
     miner(prev, data) {
-        const prevValue = prev || '0'
-        const hash = crypto.createHash('sha256')
-        const nonce = crypto.randomUUID();
-        hash.update(`${prevValue}${JSON.stringify(data)}${nonce}`)
-        const code = hash.digest('hex');
-        console.log(code,'eita');
-        if (code.substr(0, this._level) === this.genLevel()) {
-            return { prevValue, hash, data, nonce }
+        let hash = crypto.createHash('sha256')
+        const level = this.genLevel();
+        let nonce = crypto.randomUUID();
+        hash.update(`${prev}${JSON.stringify(data)}${nonce}`)
+
+        let code = hash.digest('hex');
+
+        while (code.slice(0, this._level) !== level) {
+            hash = crypto.createHash('sha256')
+            nonce = crypto.randomUUID();
+            hash.update(`${prev}${JSON.stringify(data)}${nonce}`);
+            code = hash.digest('hex');
         }
-        return this.miner(prevValue, data);
+
+        return { prev, hash: code, data, nonce }
     }
 
 }
