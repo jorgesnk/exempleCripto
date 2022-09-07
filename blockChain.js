@@ -2,7 +2,7 @@ const crypto = require("crypto");
 
 class BlockChain {
     constructor() {
-        this._level = 5
+        this._level = 3
     }
 
 
@@ -33,6 +33,15 @@ class BlockChain {
         }
 
         return { prev, hash: code, data, nonce }
+    }
+    validateBlock(prev, hash, nonce, data) {
+        const compareHash = crypto.createHash('sha256')
+            .update(`${prev}${JSON.stringify(data)}${nonce}`).digest('hex');
+        if (compareHash !== hash) {
+            throw new Error("invalid block compare")
+        }
+
+
     }
 
 }
